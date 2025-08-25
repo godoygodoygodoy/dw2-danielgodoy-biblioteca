@@ -104,8 +104,19 @@ function render(items){
   items.forEach(it=>{
     const card = document.createElement('article')
     card.className = 'card'
-    card.innerHTML = `<h4>${it.titulo}</h4><div class="meta">${it.autor} • ${it.ano}</div><div>Status: <strong>${it.status}</strong></div>
-      <div style="margin-top:8px"><button data-id="${it.id}" class="btn-edit">Editar</button> <button data-id="${it.id}" class="btn-delete">Excluir</button> <button data-id="${it.id}" class="btn-emprestar">${it.status==='disponível' ? 'Emprestar' : 'Devolver'}</button></div>`
+    const coverText = (it.genero && it.genero.toUpperCase()) || 'LIV'
+    card.innerHTML = `
+      <div class="cover">${coverText}</div>
+      <div class="body">
+        <h4>${it.titulo}</h4>
+        <div class="meta">${it.autor} • ${it.ano}</div>
+        <div style="margin-top:6px"><span class="badge ${it.status==='disponível' ? 'disponivel' : 'emprestado'}">${it.status}</span></div>
+        <div class="actions">
+          <button data-id="${it.id}" class="btn-edit">Editar</button>
+          <button data-id="${it.id}" class="btn-delete">Excluir</button>
+          <button data-id="${it.id}" class="btn-emprestar">${it.status==='disponível' ? 'Emprestar' : 'Devolver'}</button>
+        </div>
+      </div>`
     listEl.appendChild(card)
   })
   // delegate buttons
