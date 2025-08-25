@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, validator
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from datetime import datetime
 from sqlalchemy.orm import Session
 
@@ -71,8 +71,16 @@ def health():
     return {"status": "ok"}
 
 
-@app.get("/livros", response_model=List[LivroOut])
-def list_livros(search: Optional[str] = None, genero: Optional[str] = None, ano: Optional[int] = None, status: Optional[str] = None, db: Session = Depends(get_db)):
+@app.get("/livros")
+def list_livros(search: Optional[str] = None, genero: Optional[str] = None, ano: Optional[int] = None, status: Optional[str] = None, page: int = 1, per_page: int = 10, db: Session = Depends(get_db)) -> Dict[str, Any]:
+    # pagination safety
+    if page < 1:
+        page = 1
+    if per_page < 1:
+        per_page = 10
+    if per_page > 100:
+        per_page = 100
+
     q = db.query(models.Livro)
     if search:
         s = f"%{search}%"
@@ -83,7 +91,10 @@ def list_livros(search: Optional[str] = None, genero: Optional[str] = None, ano:
         q = q.filter(models.Livro.ano == ano)
     if status:
         q = q.filter(models.Livro.status == status)
-    return q.order_by(models.Livro.titulo).all()
+
+    total = q.count()
+    items = q.order_by(models.Livro.titulo).offset((page - 1) * per_page).limit(per_page).all()
+    return {"items": items, "total": total, "page": page, "per_page": per_page}
 
 
 @app.post("/livros", response_model=LivroOut, status_code=201)

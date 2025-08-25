@@ -10,6 +10,8 @@ const sortEl = el('sort')
 const modal = el('modal')
 const form = el('form')
 let editId = null
+let currentPage = 1
+const perPage = 10
 
 // persistence for sort
 sortEl.value = localStorage.getItem('biblioteca.sort') || 'titulo'
@@ -81,16 +83,21 @@ async function load(){
   if(filtroGenero.value) params.set('genero', filtroGenero.value)
   if(filtroAno.value) params.set('ano', filtroAno.value)
   if(filtroStatus.value) params.set('status', filtroStatus.value)
+  params.set('page', currentPage)
+  params.set('per_page', perPage)
   const url = `${API}/livros?${params.toString()}`
   const data = await fetch(url).then(r=>r.json())
   // sort
   const sortKey = localStorage.getItem('biblioteca.sort') || 'titulo'
-  data.sort((a,b)=>{
+  // server returns {items, total}
+  const items = data.items || []
+  items.sort((a,b)=>{
     if(sortKey==='ano') return b.ano - a.ano
     return a.titulo.localeCompare(b.titulo)
   })
-  render(data)
-  populateGeneroOptions(data)
+  render(items)
+  populateGeneroOptions(items)
+  renderPagination(data.total || 0, data.page || currentPage)
 }
 
 function populateGeneroOptions(data){
@@ -135,13 +142,36 @@ function render(items){
     const txt = e.target.textContent
     if(txt.includes('Emprestar')){
       const res = await fetch(`${API}/livros/${id}/emprestar`, {method:'POST'})
-      if(!res.ok) alert('Não foi possível emprestar')
+      if(!res.ok) return toast('Não foi possível emprestar', 'error')
+      toast('Livro emprestado', 'success')
     } else {
       const res = await fetch(`${API}/livros/${id}/devolver`, {method:'POST'})
-      if(!res.ok) alert('Não foi possível devolver')
+      if(!res.ok) return toast('Não foi possível devolver', 'error')
+      toast('Livro devolvido', 'success')
     }
     load()
   }))
+}
+
+function renderPagination(total, page){
+  const pages = Math.max(1, Math.ceil(total / perPage))
+  let nav = document.getElementById('pagination')
+  if(!nav){
+    nav = document.createElement('div');nav.id='pagination';nav.style.marginTop='12px';nav.style.display='flex';nav.style.gap='8px'
+    document.querySelector('.main').appendChild(nav)
+  }
+  nav.innerHTML = `<button id="prev" ${page<=1? 'disabled':''}>Anterior</button> <span> ${page} / ${pages} </span> <button id="next" ${page>=pages? 'disabled':''}>Próxima</button>`
+  document.getElementById('prev').onclick = ()=>{ if(page>1){ currentPage = page-1; load() } }
+  document.getElementById('next').onclick = ()=>{ if(page<pages){ currentPage = page+1; load() } }
+}
+
+function toast(msg, type='info'){
+  let t = document.getElementById('toast')
+  if(!t){ t = document.createElement('div'); t.id='toast'; t.style.position='fixed'; t.style.right='16px'; t.style.bottom='16px'; t.style.padding='10px 14px'; t.style.borderRadius='8px'; t.style.color='#fff'; t.style.boxShadow='0 6px 20px rgba(2,6,23,0.2)'; document.body.appendChild(t) }
+  t.style.background = type==='error' ? '#ef4444' : (type==='success' ? '#10b981' : '#1e3a8a')
+  t.textContent = msg
+  t.style.opacity = '1'
+  setTimeout(()=>{ t.style.opacity='0'; }, 2500)
 }
 
 searchEl.addEventListener('input', debounce(load, 300))
