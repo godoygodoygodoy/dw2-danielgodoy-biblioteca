@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Biblioteca Escolar</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="header">
+    <div class="brand">Biblioteca Escolar</div>
+    <input id="search" aria-label="Buscar livros" placeholder="Buscar título ou autor" />
+    <button id="btn-new" title="Novo Livro (Alt+N)">Novo Livro</button>
+  </header>
+  <div class="container">
+    <aside class="sidebar" aria-label="Filtros">
+      <h3>Filtros</h3>
+      <label>Gênero<br>
+        <select id="filter-genero">
+          <option value="">Todos</option>
+        </select>
+      </label>
+      <label>Ano<br>
+        <input type="number" id="filter-ano" min="1900" max="2100" />
+      </label>
+      <label>Status<br>
+        <select id="filter-status">
+          <option value="">Todos</option>
+          <option value="disponível">Disponível</option>
+          <option value="emprestado">Emprestado</option>
+        </select>
+      </label>
+      <div class="controls">
+        <button id="export-csv">Exportar CSV</button>
+        <button id="export-json">Exportar JSON</button>
+      </div>
+    </aside>
+    <main class="main" id="main">
+      <div class="controls-top">
+        <label>Ordenar por:
+          <select id="sort">
+            <option value="titulo">Título</option>
+            <option value="ano">Ano</option>
+          </select>
+        </label>
+      </div>
+      <div id="list" class="card-list" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <!-- Modal Novo Livro -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <form id="form" class="modal-content" novalidate>
+      <h2>Novo / Editar Livro</h2>
+      <label>Título*<input id="f-titulo" name="titulo" required minlength="3" maxlength="90"></label>
+      <label>Autor*<input id="f-autor" name="autor" required minlength="3" maxlength="80"></label>
+      <label>Ano*<input id="f-ano" name="ano" type="number" required min="1900" max="2100"></label>
+      <label>Gênero<select id="f-genero" name="genero"><option value="">--</option><option>HQ</option><option>Ficção</option><option>Infantil</option><option>Mistério</option><option>Fantasia</option></select></label>
+      <label>ISBN<input id="f-isbn" name="isbn"></label>
+      <label>Status<select id="f-status" name="status"><option value="disponível">Disponível</option><option value="emprestado">Emprestado</option></select></label>
+      <div class="modal-actions">
+        <button type="submit">Salvar</button>
+        <button type="button" id="btn-cancel">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <script src="scripts.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+GET http://127.0.0.1:8000/health
+
+GET http://127.0.0.1:8000/livros
+
+POST http://127.0.0.1:8000/livros
+Content-Type: application/json
+
+{
+  "titulo": "Teste Livro",
+  "autor": "Autor Teste",
+  "ano": 2020,
+  "genero": "Ficção",
+  "isbn": "",
+  "status": "disponível"
+}
+
+POST http://127.0.0.1:8000/livros/1/emprestar
+
+POST http://127.0.0.1:8000/livros/1/devolver
