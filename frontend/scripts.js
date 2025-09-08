@@ -1,4 +1,4 @@
-const API = 'http://localhost:8000'
+const API = 'http://localhost:8002'
 
 const el = id => document.getElementById(id)
 const listEl = el('list')
@@ -29,7 +29,10 @@ function openModal(data){
     el('f-ano').value = data.ano
     el('f-genero').value = data.genero || ''
     el('f-isbn').value = data.isbn || ''
-    el('f-status').value = data.status
+    el('f-cover').value = data.cover_url || ''
+    // Set status radio
+    const statusRadio = document.querySelector(`input[name="status"][value="${data.status}"]`)
+    if(statusRadio) statusRadio.checked = true
   } else {
     editId = null
     form.reset()
@@ -38,6 +41,32 @@ function openModal(data){
 }
 function closeModal(){
   modal.setAttribute('aria-hidden','true')
+}
+
+function openDetail(book){
+  const detail = el('detail')
+  const cover = book.cover_url ? `<img src="${book.cover_url}" alt="Capa de ${book.titulo}" style="width:200px;height:auto;border-radius:8px;">` : `<div style="width:200px;height:250px;background:#1e3a3a;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:8px;font-weight:bold;">${(book.genero||'').toUpperCase()||'LIV'}</div>`
+  
+  detail.innerHTML = `
+    <div class="detail-content">
+      <button class="detail-close" onclick="closeDetail()">&times;</button>
+      <h2>${book.titulo}</h2>
+      <div class="detail-cover">${cover}</div>
+      <div class="detail-info">
+        <p><strong>Autor:</strong> ${book.autor}</p>
+        <p><strong>Ano:</strong> ${book.ano}</p>
+        <p><strong>Gênero:</strong> ${book.genero || 'N/A'}</p>
+        <p><strong>ISBN:</strong> ${book.isbn || 'N/A'}</p>
+        <p><strong>Status:</strong> <span class="badge ${book.status==='disponível' ? 'disponivel' : 'emprestado'}">${book.status}</span></p>
+        ${book.data_emprestimo ? `<p><strong>Data Empréstimo:</strong> ${new Date(book.data_emprestimo).toLocaleDateString('pt-BR')}</p>` : ''}
+      </div>
+    </div>
+  `
+  detail.setAttribute('aria-hidden', 'false')
+}
+
+function closeDetail(){
+  el('detail').setAttribute('aria-hidden', 'true')
 }
 
 el('btn-new').addEventListener('click', ()=>openModal())
@@ -59,11 +88,13 @@ form.addEventListener('submit', async (ev)=>{
     ano: Number(el('f-ano').value),
     genero: el('f-genero').value || null,
     isbn: el('f-isbn').value || null,
-    status: el('f-status').value
+    cover_url: el('f-cover').value.trim() || null,
+    status: document.querySelector('input[name="status"]:checked')?.value || 'disponível'
   }
   // simple local duplicate check
   const all = await fetch(`${API}/livros`).then(r=>r.json())
-  if(!editId && all.some(b=>b.titulo.toLowerCase()===payload.titulo.toLowerCase())){
+  const items = all.items || all
+  if(!editId && items.some(b=>b.titulo.toLowerCase()===payload.titulo.toLowerCase())){
     alert('Título já existe (verifique antes de gravar)')
     return
   }
@@ -111,9 +142,9 @@ function render(items){
   items.forEach(it=>{
     const card = document.createElement('article')
     card.className = 'card'
-    const coverText = (it.genero && it.genero.toUpperCase()) || 'LIV'
+    const cover = it.cover_url ? `<div class="cover"><img src="${it.cover_url}" alt="Capa de ${it.titulo}"></div>` : `<div class="cover">${(it.genero||'').toUpperCase()||'LIV'}</div>`
     card.innerHTML = `
-      <div class="cover">${coverText}</div>
+      ${cover}
       <div class="body">
         <h4>${it.titulo}</h4>
         <div class="meta">${it.autor} • ${it.ano}</div>
@@ -125,12 +156,15 @@ function render(items){
         </div>
       </div>`
     listEl.appendChild(card)
+    card.addEventListener('click', (e)=>{ if(e.target.tagName.toLowerCase()!=='button') openDetail(it) })
   })
   // delegate buttons
   listEl.querySelectorAll('.btn-edit').forEach(b=>b.addEventListener('click', async e=>{
     const id = e.target.dataset.id
-    const book = await fetch(`${API}/livros`).then(r=>r.json()).then(arr=>arr.find(x=>x.id==id))
-    openModal(book)
+    const book = items.find(x=>x.id==id)
+    if(book) {
+      openModal(book)
+    }
   }))
   listEl.querySelectorAll('.btn-delete').forEach(b=>b.addEventListener('click', async e=>{
     if(!confirm('Excluir livro?')) return
@@ -181,15 +215,29 @@ function debounce(fn, wait){let t;return (...a)=>{clearTimeout(t);t=setTimeout((
 
 // exporters
 el('export-json').addEventListener('click', async ()=>{
-  const data = await fetch(`${API}/livros`).then(r=>r.json())
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'})
+  const params = new URLSearchParams()
+  if(searchEl.value) params.set('search', searchEl.value)
+  if(filtroGenero.value) params.set('genero', filtroGenero.value)
+  if(filtroAno.value) params.set('ano', filtroAno.value)
+  if(filtroStatus.value) params.set('status', filtroStatus.value)
+  params.set('per_page', 1000) // Get all filtered results
+  const data = await fetch(`${API}/livros?${params.toString()}`).then(r=>r.json())
+  const items = data.items || data
+  const blob = new Blob([JSON.stringify(items,null,2)], {type:'application/json'})
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a');a.href=url;a.download='livros.json';a.click();URL.revokeObjectURL(url)
 })
 el('export-csv').addEventListener('click', async ()=>{
-  const data = await fetch(`${API}/livros`).then(r=>r.json())
-  const keys = ['id','titulo','autor','ano','genero','isbn','status','data_emprestimo']
-  const csv = [keys.join(',')].concat(data.map(r=>keys.map(k=>`"${(r[k]||'').toString().replace(/"/g,'""')}"`).join(','))).join('\n')
+  const params = new URLSearchParams()
+  if(searchEl.value) params.set('search', searchEl.value)
+  if(filtroGenero.value) params.set('genero', filtroGenero.value)
+  if(filtroAno.value) params.set('ano', filtroAno.value)
+  if(filtroStatus.value) params.set('status', filtroStatus.value)
+  params.set('per_page', 1000) // Get all filtered results
+  const data = await fetch(`${API}/livros?${params.toString()}`).then(r=>r.json())
+  const items = data.items || data
+  const keys = ['id','titulo','autor','ano','genero','isbn','cover_url','status','data_emprestimo']
+  const csv = [keys.join(',')].concat(items.map(r=>keys.map(k=>`"${(r[k]||'').toString().replace(/"/g,'""')}"`).join(','))).join('\n')
   const blob = new Blob([csv], {type:'text/csv'})
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a');a.href=url;a.download='livros.csv';a.click();URL.revokeObjectURL(url)
