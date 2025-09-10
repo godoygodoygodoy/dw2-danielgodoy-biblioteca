@@ -1,0 +1,149 @@
+### SISTEMA BIBLIOTECA ESCOLAR - TESTES DA API
+### Arquivo para testes manuais com Thunder Client, REST Client ou Insomnia
+
+### Health Check
+GET http://localhost:8000/health
+
+###
+
+### Listar todos os livros
+GET http://localhost:8000/livros
+
+###
+
+### Listar livros com filtros
+GET http://localhost:8000/livros?search=homem&editora=Marvel&status=disponível
+
+###
+
+### Obter livro específico
+GET http://localhost:8000/livros/1
+
+###
+
+### Criar novo livro
+POST http://localhost:8000/livros
+Content-Type: application/json
+
+{
+  "titulo": "Doutor Estranho: Multiverso da Loucura",
+  "autor": "Jed MacKay",
+  "ano": 2024,
+  "genero": "Super-Herói",
+  "editora": "Marvel",
+  "numero_edicao": 1,
+  "isbn": "978-0-12345-021-1",
+  "descricao": "Stephen Strange enfrenta ameaças de múltiplas dimensões.",
+  "capa_url": "https://via.placeholder.com/300x400/800080/FFFFFF?text=DrStrange"
+}
+
+###
+
+### Atualizar livro existente
+PUT http://localhost:8000/livros/1
+Content-Type: application/json
+
+{
+  "titulo": "Homem-Aranha: A Grande Responsabilidade - Edição Especial",
+  "descricao": "A origem clássica do Homem-Aranha reimaginada para uma nova geração com conteúdo extra."
+}
+
+###
+
+### Emprestar livro
+POST http://localhost:8000/livros/1/emprestar
+
+###
+
+### Devolver livro
+POST http://localhost:8000/livros/1/devolver
+
+###
+
+### Obter estatísticas
+GET http://localhost:8000/estatisticas
+
+###
+
+### Deletar livro
+DELETE http://localhost:8000/livros/21
+
+###
+
+### TESTES DE VALIDAÇÃO - Casos de erro
+
+### Tentar criar livro com dados inválidos
+POST http://localhost:8000/livros
+Content-Type: application/json
+
+{
+  "titulo": "AB",
+  "autor": "",
+  "ano": 1800,
+  "capa_url": "url-invalida"
+}
+
+###
+
+### Tentar emprestar livro já emprestado
+POST http://localhost:8000/livros/2/emprestar
+
+###
+
+### Tentar acessar livro inexistente
+GET http://localhost:8000/livros/999
+
+###
+
+### TESTES DE BUSCA E FILTROS
+
+### Buscar por Marvel
+GET http://localhost:8000/livros?editora=Marvel
+
+###
+
+### Buscar por gênero
+GET http://localhost:8000/livros?genero=Super-Herói
+
+###
+
+### Buscar livros emprestados
+GET http://localhost:8000/livros?status=emprestado
+
+###
+
+### Buscar com múltiplos filtros
+GET http://localhost:8000/livros?search=batman&editora=DC&genero=Crime
+
+###
+
+### Buscar com paginação
+GET http://localhost:8000/livros?limit=5&offset=10
+
+###
+
+### TESTES DE CASOS EXTREMOS
+
+### Criar livro com título muito longo (deve falhar)
+POST http://localhost:8000/livros
+Content-Type: application/json
+
+{
+  "titulo": "Este é um título muito muito muito muito muito muito muito muito muito muito muito longo que deve falhar",
+  "autor": "Autor Teste",
+  "ano": 2024
+}
+
+###
+
+### Criar livro com ano futuro (deve falhar)
+POST http://localhost:8000/livros
+Content-Type: application/json
+
+{
+  "titulo": "Livro do Futuro",
+  "autor": "Autor Futuro",
+  "ano": 2030
+}
+
+###
