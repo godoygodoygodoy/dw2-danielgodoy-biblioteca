@@ -22,6 +22,8 @@ const CONFIG = {
 };
 
 // Estado global da aplicação
+let isOfflineMode = false;
+
 const AppState = {
     currentPage: 'home',
     currentBooks: [],
@@ -125,11 +127,142 @@ const ApiService = {
             return data;
         } catch (error) {
             console.error('API Error:', error);
+            // Se API não estiver disponível, usar dados mock
+            if (error.message.includes('fetch')) {
+                console.warn('API não disponível, usando dados mock');
+                
+                // Marcar como modo offline e mostrar indicador
+                if (!isOfflineMode) {
+                    isOfflineMode = true;
+                    this.showOfflineIndicator();
+                    UI.showToast('Conectando em modo offline com dados de exemplo', 'warning');
+                }
+                
+                return this.getMockData(endpoint);
+            }
             UI.showToast('Erro na comunicação com o servidor', 'error');
             throw error;
         } finally {
             UI.hideLoading();
         }
+    },
+
+    showOfflineIndicator() {
+        const indicator = document.getElementById('offline-indicator');
+        if (indicator) {
+            indicator.style.display = 'inline-flex';
+        }
+    },
+
+    // Dados mock para quando API não estiver disponível
+    getMockData(endpoint) {
+        const mockBooks = [
+            {
+                id: 1,
+                titulo: "Homem-Aranha: A Grande Responsabilidade",
+                autor: "Stan Lee, Steve Ditko",
+                ano: 2023,
+                genero: "Super-Herói",
+                editora: "Marvel",
+                numero_edicao: 1,
+                isbn: "978-0-12345-001-1",
+                status: "disponível",
+                data_emprestimo: null,
+                descricao: "A origem clássica do Homem-Aranha reimaginada para uma nova geração.",
+                capa_url: "https://via.placeholder.com/300x400/FF0000/FFFFFF?text=Spider-Man"
+            },
+            {
+                id: 2,
+                titulo: "X-Men: Fênix Negra - Saga Completa",
+                autor: "Chris Claremont, John Byrne",
+                ano: 2022,
+                genero: "Super-Herói",
+                editora: "Marvel",
+                numero_edicao: 2,
+                isbn: "978-0-12345-002-2",
+                status: "emprestado",
+                data_emprestimo: "2025-09-05T00:00:00",
+                descricao: "A saga épica da Fênix Negra que mudou os X-Men para sempre.",
+                capa_url: "https://via.placeholder.com/300x400/FFA500/FFFFFF?text=X-Men"
+            },
+            {
+                id: 3,
+                titulo: "Batman: Ano Um",
+                autor: "Frank Miller, David Mazzucchelli",
+                ano: 2023,
+                genero: "Crime",
+                editora: "DC",
+                numero_edicao: 1,
+                isbn: "978-0-12345-007-7",
+                status: "disponível",
+                data_emprestimo: null,
+                descricao: "A origem definitiva do Batman e sua primeira parceria com Jim Gordon.",
+                capa_url: "https://via.placeholder.com/300x400/000000/FFFF00?text=Batman"
+            },
+            {
+                id: 4,
+                titulo: "The Walking Dead: Compendium Vol. 1",
+                autor: "Robert Kirkman, Tony Moore",
+                ano: 2023,
+                genero: "Horror",
+                editora: "Image",
+                numero_edicao: 1,
+                isbn: "978-0-12345-013-3",
+                status: "disponível",
+                data_emprestimo: null,
+                descricao: "A saga épica de sobrivência no apocalipse zumbi.",
+                capa_url: "https://via.placeholder.com/300x400/2F4F2F/FFFFFF?text=WalkingDead"
+            },
+            {
+                id: 5,
+                titulo: "Superman: Todas as Estrelas",
+                autor: "Grant Morrison, Frank Quitely",
+                ano: 2022,
+                genero: "Super-Herói",
+                editora: "DC",
+                numero_edicao: 3,
+                isbn: "978-0-12345-008-8",
+                status: "emprestado",
+                data_emprestimo: "2025-09-08T00:00:00",
+                descricao: "Uma reinvenção moderna do Homem de Aço.",
+                capa_url: "https://via.placeholder.com/300x400/0066CC/FF0000?text=Superman"
+            },
+            {
+                id: 6,
+                titulo: "Saga Vol. 1",
+                autor: "Brian K. Vaughan, Fiona Staples",
+                ano: 2023,
+                genero: "Ficção Científica",
+                editora: "Image",
+                numero_edicao: 1,
+                isbn: "978-0-12345-015-5",
+                status: "disponível",
+                data_emprestimo: null,
+                descricao: "Uma épica space opera sobre amor e família.",
+                capa_url: "https://via.placeholder.com/300x400/9932CC/FFFFFF?text=Saga"
+            }
+        ];
+
+        const mockStats = {
+            total_livros: mockBooks.length,
+            livros_disponiveis: mockBooks.filter(b => b.status === 'disponível').length,
+            livros_emprestados: mockBooks.filter(b => b.status === 'emprestado').length,
+            por_editora: {
+                'Marvel': mockBooks.filter(b => b.editora === 'Marvel').length,
+                'DC': mockBooks.filter(b => b.editora === 'DC').length,
+                'Image': mockBooks.filter(b => b.editora === 'Image').length
+            }
+        };
+
+        if (endpoint.includes('/livros')) {
+            return mockBooks;
+        } else if (endpoint.includes('/estatisticas')) {
+            return mockStats;
+        } else if (endpoint.includes('/health')) {
+            return { status: 'mock', message: 'Usando dados mock' };
+        }
+        
+        return [];
     },
 
     // Listar livros com filtros
@@ -763,16 +896,46 @@ const BookManager = {
     // Alternar status do livro (emprestar/devolver)
     async toggleBookStatus(id) {
         try {
-            const book = AppState.currentBooks.find(b => b.id === id);
-            if (!book) return;
+            // Encontrar livro no estado atual
+            let book = AppState.currentBooks.find(b => b.id === id);
+            if (!book) {
+                // Se não encontrou, buscar nos dados mock
+                const mockData = ApiService.getMockData('/livros');
+                book = mockData.find(b => b.id === id);
+            }
+            
+            if (!book) {
+                UI.showToast('Livro não encontrado', 'error');
+                return;
+            }
 
-            let result;
-            if (book.status === 'disponível') {
-                result = await ApiService.borrowBook(id);
-                UI.showToast(`Livro "${book.titulo}" emprestado com sucesso!`, 'success');
-            } else {
-                result = await ApiService.returnBook(id);
-                UI.showToast(`Livro "${book.titulo}" devolvido com sucesso!`, 'success');
+            try {
+                let result;
+                if (book.status === 'disponível') {
+                    result = await ApiService.borrowBook(id);
+                    UI.showToast(`Livro "${book.titulo}" emprestado com sucesso!`, 'success');
+                } else {
+                    result = await ApiService.returnBook(id);
+                    UI.showToast(`Livro "${book.titulo}" devolvido com sucesso!`, 'success');
+                }
+            } catch (apiError) {
+                // Se API não estiver disponível, simular localmente
+                console.warn('API não disponível, simulando operação localmente');
+                
+                // Atualizar status localmente
+                book.status = book.status === 'disponível' ? 'emprestado' : 'disponível';
+                book.data_emprestimo = book.status === 'emprestado' ? new Date().toISOString() : null;
+                
+                // Atualizar no array local
+                const bookIndex = AppState.currentBooks.findIndex(b => b.id === id);
+                if (bookIndex >= 0) {
+                    AppState.currentBooks[bookIndex] = book;
+                }
+                
+                UI.showToast(
+                    `Livro "${book.titulo}" ${book.status === 'emprestado' ? 'emprestado' : 'devolvido'} com sucesso! (modo offline)`, 
+                    'warning'
+                );
             }
 
             // Recarregar dados
@@ -784,7 +947,8 @@ const BookManager = {
             }
 
         } catch (error) {
-            UI.showToast(error.message || 'Erro ao alterar status do livro', 'error');
+            console.error('Erro ao alterar status:', error);
+            UI.showToast('Erro ao alterar status do livro', 'error');
         }
     },
 
@@ -1034,6 +1198,8 @@ const FilterManager = {
  * Gerenciador de tema claro/escuro
  */
 const ThemeManager = {
+    currentTheme: 'light',
+
     init() {
         this.loadSavedTheme();
         this.setupEventListeners();
@@ -1042,21 +1208,22 @@ const ThemeManager = {
     setupEventListeners() {
         const themeToggle = document.getElementById('theme-toggle');
         if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
+            themeToggle.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.toggleTheme();
             });
         }
     },
 
     toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
         this.setTheme(newTheme);
     },
 
     setTheme(theme) {
+        this.currentTheme = theme;
         document.documentElement.setAttribute('data-theme', theme);
+        document.body.setAttribute('data-theme', theme);
         
         // Atualizar ícone do botão
         const themeToggle = document.getElementById('theme-toggle');
@@ -1065,11 +1232,20 @@ const ThemeManager = {
             icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
         }
         
+        // Atualizar aria-label
+        if (themeToggle) {
+            themeToggle.setAttribute('aria-label', 
+                theme === 'dark' ? 'Alternar para tema claro' : 'Alternar para tema escuro'
+            );
+        }
+        
         // Salvar preferência
         localStorage.setItem(CONFIG.STORAGE_KEYS.THEME, theme);
         
         // Feedback para usuário
         UI.showToast(`Tema ${theme === 'dark' ? 'escuro' : 'claro'} ativado`, 'info');
+        
+        console.log(`Tema alterado para: ${theme}`);
     },
 
     loadSavedTheme() {
@@ -1301,8 +1477,8 @@ class BibliotecaApp {
         if (this.isInitialized) return;
 
         try {
-            // Verificar se API está disponível
-            await this.checkApiHealth();
+            // Verificar se API está disponível (não bloquear se não estiver)
+            const apiAvailable = await this.checkApiHealth();
 
             // Inicializar módulos
             ThemeManager.init();
@@ -1317,19 +1493,28 @@ class BibliotecaApp {
             UI.showPage('home');
 
             this.isInitialized = true;
-            UI.showToast('Sistema carregado com sucesso!', 'success');
+            
+            if (apiAvailable) {
+                UI.showToast('Sistema carregado com sucesso!', 'success');
+            } else {
+                UI.showToast('Sistema carregado em modo demonstração!', 'info');
+            }
 
         } catch (error) {
             console.error('Erro ao inicializar aplicação:', error);
-            UI.showToast('Erro ao carregar o sistema. Verifique se a API está rodando.', 'error');
+            UI.showToast('Erro ao carregar o sistema', 'error');
         }
     }
 
     async checkApiHealth() {
         try {
             await ApiService.healthCheck();
+            console.log('✅ API conectada com sucesso');
+            return true;
         } catch (error) {
-            throw new Error('API não está disponível');
+            console.warn('⚠️ API não disponível, usando modo offline com dados mock');
+            UI.showToast('Modo offline ativado - usando dados de exemplo', 'warning');
+            return false;
         }
     }
 
