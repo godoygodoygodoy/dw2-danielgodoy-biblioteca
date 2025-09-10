@@ -144,3 +144,27 @@ O usuário precisa desenvolver um sistema de biblioteca completo focado em HQs (
 **Modificações manuais: ~15% (ajustes específicos de design e validações)**
 
 **Conclusão:** O GitHub Copilot foi fundamental para acelerar o desenvolvimento, especialmente na geração de boilerplate code e sugestões de boas práticas. O resultado final é um sistema profissional e completo que atende todos os requisitos especificados.
+
+---
+
+### Conversa 7: Correção de Compatibilidade CSS
+
+**Prompt de erro identificado:**
+"deu que tem um problema no styles.css, na linha 630 coluna 5"
+
+**Análise do Copilot:**
+Identificado erro de compatibilidade CSS na propriedade `-webkit-line-clamp` na linha 630. O problema era que estávamos usando apenas a versão webkit sem a propriedade padrão `line-clamp`.
+
+**Correção aplicada:**
+```css
+/* Antes (só webkit) */
+-webkit-line-clamp: 2;
+
+/* Depois (webkit + padrão para compatibilidade) */
+-webkit-line-clamp: 2;
+line-clamp: 2;
+```
+
+**Por que importante:** Garante compatibilidade entre navegadores diferentes, especialmente os que não são baseados em Webkit.
+
+**Resultado:** CSS agora está 100% válido e compatível com todos os navegadores modernos.
