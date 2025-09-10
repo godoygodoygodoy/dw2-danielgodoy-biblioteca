@@ -7,6 +7,7 @@
 :root {
     /* Cores do tema claro */
     --primary-color: #1E3A8A;      /* Azul marinho */
+    --primary-hover: #1E40AF;      /* Azul marinho hover */
     --secondary-color: #F59E0B;    /* Âmbar */
     --accent-color: #10B981;       /* Verde */
     --background-color: #F8FAFC;   /* Cinza muito claro */
@@ -77,6 +78,8 @@
     --border-color: #334155;
     --border-light: #475569;
     --overlay-bg: rgba(0, 0, 0, 0.7);
+    --primary-color: #60A5FA;      /* Azul claro para modo escuro */
+    --primary-hover: #3B82F6;     /* Azul claro hover */
 }
 
 /* Reset e base */
@@ -303,8 +306,8 @@ body {
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: #1E40AF;
-    border-color: #1E40AF;
+    background: var(--primary-hover, #1E40AF);
+    border-color: var(--primary-hover, #1E40AF);
 }
 
 .btn-secondary {
@@ -348,7 +351,7 @@ body {
 }
 
 .btn-link:hover {
-    color: #1E40AF;
+    color: var(--primary-hover, #1E40AF);
 }
 
 .theme-toggle {
