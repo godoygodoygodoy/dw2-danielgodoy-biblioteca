@@ -169,7 +169,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A origem clássica do Homem-Aranha reimaginada para uma nova geração.",
-                capa_url: "https://images.unsplash.com/photo-1608889175250-d3c65734e9b1?w=300&h=400&fit=crop&crop=center"
+                capa_url: "https://i.imgur.com/VjJqz7a.jpg"
             },
             {
                 id: 2,
@@ -183,7 +183,7 @@ const ApiService = {
                 status: "emprestado",
                 data_emprestimo: "2023-12-01",
                 descricao: "A saga épica da Fênix Negra que mudou os X-Men para sempre.",
-                capa_url: "https://images.unsplash.com/photo-1621155346373-94c05bd47d9d?w=300&h=400&fit=crop&crop=center"
+                capa_url: "https://i.imgur.com/8mQrJpN.jpg"
             },
             {
                 id: 3,
@@ -197,7 +197,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A origem definitiva do Batman e sua primeira parceria com Jim Gordon.",
-                capa_url: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=300&h=400&fit=crop&crop=center"
+                capa_url: "https://i.imgur.com/2Xv3Czb.jpg"
             },
             {
                 id: 4,
@@ -211,7 +211,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A saga épica de sobrivência no apocalipse zumbi.",
-                capa_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop&crop=center"
+                capa_url: "https://i.imgur.com/5qm2Hvd.jpg"
             },
             {
                 id: 5,
@@ -225,7 +225,7 @@ const ApiService = {
                 status: "emprestado",
                 data_emprestimo: "2023-11-15",
                 descricao: "Uma reinvenção moderna do Homem de Aço.",
-                capa_url: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=300&h=400&fit=crop&crop=center"
+                capa_url: "https://i.imgur.com/kWJQz2R.jpg"
             },
             {
                 id: 6,
@@ -239,7 +239,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "Uma épica space opera sobre amor e família.",
-                capa_url: "https://images.unsplash.com/photo-1551191321-6c98b85b8b73?w=300&h=400&fit=crop&crop=center"
+                capa_url: "https://i.imgur.com/8FmVQNk.jpg"
             }
         ];
 
@@ -1661,17 +1661,47 @@ const MenuManager = {
         const menuToggle = document.getElementById('menu-toggle');
         const sidebar = document.querySelector('.sidebar');
         
+        console.log('Configurando menu toggle...', {menuToggle, sidebar});
+        
         if (menuToggle && sidebar) {
-            menuToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('open');
+            // Remover event listeners antigos
+            const newToggle = menuToggle.cloneNode(true);
+            menuToggle.parentNode.replaceChild(newToggle, menuToggle);
+            
+            // Adicionar novo event listener
+            newToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                // Atualizar ícone
-                const icon = menuToggle.querySelector('i');
-                if (sidebar.classList.contains('open')) {
-                    icon.className = 'fas fa-times';
+                console.log('Menu toggle CLICADO!');
+                
+                // Toggle das classes
+                const isOpen = sidebar.classList.contains('open');
+                
+                if (isOpen) {
+                    sidebar.classList.remove('open');
+                    newToggle.classList.remove('active');
+                    console.log('Menu FECHADO');
                 } else {
-                    icon.className = 'fas fa-bars';
+                    sidebar.classList.add('open');
+                    newToggle.classList.add('active');
+                    console.log('Menu ABERTO');
                 }
+            });
+            
+            // Adicionar evento de toque para dispositivos móveis
+            newToggle.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                console.log('Menu toggle TOCADO!');
+                newToggle.click();
+            });
+            
+        } else {
+            console.error('ERRO: Menu toggle ou sidebar não encontrados!', {
+                menuToggle: !!menuToggle,
+                sidebar: !!sidebar,
+                menuToggleElement: document.getElementById('menu-toggle'),
+                sidebarElement: document.querySelector('.sidebar')
             });
         }
     },
@@ -1684,8 +1714,7 @@ const MenuManager = {
             
             if (sidebar && menuToggle && window.innerWidth <= 768) {
                 if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('open')) {
-                    sidebar.classList.remove('open');
-                    menuToggle.querySelector('i').className = 'fas fa-bars';
+                    this.closeMenu();
                 }
             }
         });
@@ -1693,15 +1722,28 @@ const MenuManager = {
         // Fechar menu ao navegar (mobile)
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
-                const sidebar = document.querySelector('.sidebar');
-                const menuToggle = document.getElementById('menu-toggle');
-                
-                if (sidebar && menuToggle && window.innerWidth <= 768) {
-                    sidebar.classList.remove('open');
-                    menuToggle.querySelector('i').className = 'fas fa-bars';
+                if (window.innerWidth <= 768) {
+                    this.closeMenu();
                 }
             });
         });
+
+        // Fechar menu ao pressionar ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeMenu();
+            }
+        });
+    },
+
+    closeMenu() {
+        const sidebar = document.querySelector('.sidebar');
+        const menuToggle = document.getElementById('menu-toggle');
+        
+        if (sidebar && menuToggle) {
+            sidebar.classList.remove('open');
+            menuToggle.classList.remove('active');
+        }
     }
 };
 
@@ -1811,10 +1853,8 @@ const ColorCustomizer = {
         const primaryHover = document.getElementById('primary-hover')?.value || '#1E40AF';
         const accentBlue = document.getElementById('accent-blue')?.value || '#3B82F6';
 
-        // Aplicar cores ao CSS
-        document.documentElement.style.setProperty('--primary-color', primaryColor);
-        document.documentElement.style.setProperty('--primary-hover', primaryHover);
-        document.documentElement.style.setProperty('--accent-blue', accentBlue);
+        // Aplicar cores ao CSS (funciona para ambos os temas)
+        this.applyColorsToTheme(primaryColor, primaryHover, accentBlue);
 
         // Salvar cores
         this.saveColors({
@@ -1827,6 +1867,35 @@ const ColorCustomizer = {
         UI.closeModal('color-customizer-modal');
 
         UI.showToast('🎨 Cores personalizadas aplicadas com sucesso!', 'success');
+    },
+
+    applyColorsToTheme(primaryColor, primaryHover, accentBlue) {
+        // Aplicar cores globalmente (funciona para ambos os temas)
+        document.documentElement.style.setProperty('--primary-color', primaryColor);
+        document.documentElement.style.setProperty('--primary-hover', primaryHover);
+        document.documentElement.style.setProperty('--accent-blue', accentBlue);
+
+        // Criar ou atualizar CSS personalizado para garantir que funcione nos dois temas
+        let customStyle = document.getElementById('custom-color-style');
+        if (!customStyle) {
+            customStyle = document.createElement('style');
+            customStyle.id = 'custom-color-style';
+            document.head.appendChild(customStyle);
+        }
+
+        customStyle.textContent = `
+            :root {
+                --primary-color: ${primaryColor} !important;
+                --primary-hover: ${primaryHover} !important;
+                --accent-blue: ${accentBlue} !important;
+            }
+            
+            [data-theme="dark"] {
+                --primary-color: ${primaryColor} !important;
+                --primary-hover: ${primaryHover} !important;
+                --accent-blue: ${accentBlue} !important;
+            }
+        `;
     },
 
     resetAllColors() {
@@ -1857,10 +1926,8 @@ const ColorCustomizer = {
             if (saved) {
                 const colors = JSON.parse(saved);
                 
-                // Aplicar cores salvas
-                document.documentElement.style.setProperty('--primary-color', colors.primaryColor);
-                document.documentElement.style.setProperty('--primary-hover', colors.primaryHover);
-                document.documentElement.style.setProperty('--accent-blue', colors.accentBlue);
+                // Aplicar cores salvas usando a nova função que funciona em ambos os temas
+                this.applyColorsToTheme(colors.primaryColor, colors.primaryHover, colors.accentBlue);
 
                 // Atualizar inputs se modal existir
                 setTimeout(() => {

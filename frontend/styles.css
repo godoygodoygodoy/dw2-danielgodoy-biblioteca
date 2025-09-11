@@ -190,36 +190,77 @@ body {
     font-weight: 500;
 }
 
-/* Botão do Menu */
+/* Botão do Menu Hambúrguer */
 .menu-toggle {
     display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 30px;
     background: none;
     border: none;
-    color: var(--text-primary);
-    font-size: 1.2rem;
-    padding: 0.5rem;
     cursor: pointer;
-    border-radius: var(--border-radius);
-    transition: background-color 0.3s ease;
+    padding: 0;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
 }
 
-.menu-toggle:hover {
-    background-color: var(--background-hover);
+.hamburger-line {
+    width: 100%;
+    height: 3px;
+    background-color: var(--text-primary);
+    transition: all 0.3s ease;
+    transform-origin: center;
+}
+
+/* Animação do menu aberto */
+.menu-toggle.active .hamburger-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.menu-toggle.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-toggle.active .hamburger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+.menu-toggle:hover .hamburger-line {
+    background-color: var(--primary-color);
 }
 
 /* Responsivo - mostrar botão em telas pequenas */
 @media (max-width: 768px) {
     .menu-toggle {
-        display: block;
+        display: flex;
     }
     
     .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 280px;
+        height: 100vh;
+        z-index: 1000;
         transform: translateX(-100%);
         transition: transform 0.3s ease;
     }
     
     .sidebar.open {
         transform: translateX(0);
+    }
+
+    /* Overlay para fechar menu */
+    .sidebar.open::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 280px;
+        width: calc(100vw - 280px);
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
     }
 }
 

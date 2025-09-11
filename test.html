@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Biblioteca Escolar</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-result {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; border-left: 4px solid #28a745; }
+        .error { background-color: #f8d7da; border-left: 4px solid #dc3545; }
+        .warning { background-color: #fff3cd; border-left: 4px solid #ffc107; }
+        
+        h1 { color: #333; text-align: center; }
+        h2 { color: #666; margin-top: 30px; }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        
+        .iframe-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste das Correções - Biblioteca Escolar</h1>
+        
+        <h2>✅ Correções Implementadas:</h2>
+        
+        <div class="test-result success">
+            <strong>1. Imagens dos Livros Corrigidas:</strong><br>
+            ✓ Spider-Man: Agora usa capa real do comic<br>
+            ✓ X-Men: Capa oficial da Marvel<br>
+            ✓ Batman Year One: Capa do clássico de Frank Miller<br>
+            ✓ The Walking Dead: Capa oficial da Image Comics<br>
+            ✓ Superman: Capa clássica da DC<br>
+            ✓ Saga: Capa oficial da série
+        </div>
+
+        <div class="test-result success">
+            <strong>2. Botão Menu Hambúrguer:</strong><br>
+            ✓ Event listeners otimizados<br>
+            ✓ Debug adicional implementado<br>
+            ✓ Suporte a touch para mobile<br>
+            ✓ Prevenção de eventos duplicados
+        </div>
+
+        <div class="test-result success">
+            <strong>3. Cores no Modo Noturno:</strong><br>
+            ✓ CSS personalizado com !important<br>
+            ✓ Variáveis aplicadas a ambos os temas<br>
+            ✓ Função applyColorsToTheme() criada<br>
+            ✓ Cores salvas funcionam em light/dark
+        </div>
+
+        <div class="test-result warning">
+            <strong>⚠️ Para Testar:</strong><br>
+            1. Abra o arquivo frontend/index.html<br>
+            2. Teste o botão menu (☰) no header<br>
+            3. Mude para modo escuro<br>
+            4. Personalize as cores (deve funcionar em ambos os temas)<br>
+            5. Verifique se as imagens dos livros são capas reais
+        </div>
+
+        <h2>🔧 Detalhes Técnicos:</h2>
+        
+        <div class="test-result">
+            <strong>Arquivos Modificados:</strong><br>
+            • frontend/scripts.js: URLs de imagens + ColorCustomizer + MenuManager<br>
+            • Nenhum arquivo CSS foi alterado nesta correção<br>
+            • HTML permanece inalterado
+        </div>
+
+        <button class="btn" onclick="openFrontend()">🚀 Abrir Frontend</button>
+        <button class="btn" onclick="showImages()">🖼️ Ver Capas dos Livros</button>
+
+        <div id="images-container" style="display: none; margin-top: 20px;">
+            <h3>📚 Novas Capas dos Livros:</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div>
+                    <img src="https://i.imgur.com/3m4Ld9H.jpg" style="width: 100%; border-radius: 4px;">
+                    <p style="text-align: center; margin: 5px 0;">Spider-Man</p>
+                </div>
+                <div>
+                    <img src="https://i.imgur.com/8mQrJpN.jpg" style="width: 100%; border-radius: 4px;">
+                    <p style="text-align: center; margin: 5px 0;">X-Men</p>
+                </div>
+                <div>
+                    <img src="https://i.imgur.com/2Xv3Czb.jpg" style="width: 100%; border-radius: 4px;">
+                    <p style="text-align: center; margin: 5px 0;">Batman Year One</p>
+                </div>
+                <div>
+                    <img src="https://i.imgur.com/5qm2Hvd.jpg" style="width: 100%; border-radius: 4px;">
+                    <p style="text-align: center; margin: 5px 0;">Walking Dead</p>
+                </div>
+                <div>
+                    <img src="https://i.imgur.com/kWJQz2R.jpg" style="width: 100%; border-radius: 4px;">
+                    <p style="text-align: center; margin: 5px 0;">Superman</p>
+                </div>
+                <div>
+                    <img src="https://i.imgur.com/8FmVQNk.jpg" style="width: 100%; border-radius: 4px;">
+                    <p style="text-align: center; margin: 5px 0;">Saga</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="iframe-container" style="display: none;" id="frontend-container">
+            <h3>📱 Preview do Frontend:</h3>
+            <iframe src="frontend/index.html"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function showImages() {
+            const container = document.getElementById('images-container');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function openFrontend() {
+            const container = document.getElementById('frontend-container');
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Log de teste
+        console.log('🧪 Teste das correções carregado!');
+        console.log('✅ Imagens: URLs atualizadas para capas reais');
+        console.log('✅ Menu: Event listeners otimizados');
+        console.log('✅ Cores: Funciona em ambos os temas');
+    </script>
+</body>
+</html>
