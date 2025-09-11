@@ -169,7 +169,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A origem clássica do Homem-Aranha reimaginada para uma nova geração.",
-                capa_url: "https://via.placeholder.com/300x400/FF0000/FFFFFF?text=Spider-Man"
+                capa_url: "https://images.unsplash.com/photo-1608889175250-d3c65734e9b1?w=300&h=400&fit=crop&crop=center"
             },
             {
                 id: 2,
@@ -183,7 +183,7 @@ const ApiService = {
                 status: "emprestado",
                 data_emprestimo: "2023-12-01",
                 descricao: "A saga épica da Fênix Negra que mudou os X-Men para sempre.",
-                capa_url: "https://via.placeholder.com/300x400/FFA500/FFFFFF?text=X-Men"
+                capa_url: "https://images.unsplash.com/photo-1621155346373-94c05bd47d9d?w=300&h=400&fit=crop&crop=center"
             },
             {
                 id: 3,
@@ -197,7 +197,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A origem definitiva do Batman e sua primeira parceria com Jim Gordon.",
-                capa_url: "https://via.placeholder.com/300x400/000000/FFFF00?text=Batman"
+                capa_url: "https://images.unsplash.com/photo-1533738363-b7f9aef128ce?w=300&h=400&fit=crop&crop=center"
             },
             {
                 id: 4,
@@ -211,7 +211,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A saga épica de sobrivência no apocalipse zumbi.",
-                capa_url: "https://via.placeholder.com/300x400/2F4F2F/FFFFFF?text=WalkingDead"
+                capa_url: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop&crop=center"
             },
             {
                 id: 5,
@@ -225,7 +225,7 @@ const ApiService = {
                 status: "emprestado",
                 data_emprestimo: "2023-11-15",
                 descricao: "Uma reinvenção moderna do Homem de Aço.",
-                capa_url: "https://via.placeholder.com/300x400/0066CC/FF0000?text=Superman"
+                capa_url: "https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=300&h=400&fit=crop&crop=center"
             },
             {
                 id: 6,
@@ -239,7 +239,7 @@ const ApiService = {
                 status: "disponivel",
                 data_emprestimo: null,
                 descricao: "Uma épica space opera sobre amor e família.",
-                capa_url: "https://via.placeholder.com/300x400/9932CC/FFFFFF?text=Saga"
+                capa_url: "https://images.unsplash.com/photo-1551191321-6c98b85b8b73?w=300&h=400&fit=crop&crop=center"
             }
         ];
 
@@ -627,9 +627,9 @@ const UI = {
     },
 
     createBookCard(book) {
-        const statusClass = book.status === 'disponível' ? 'disponivel' : 'emprestado';
-        const statusText = Utils.capitalize(book.status);
-        const defaultCover = 'https://via.placeholder.com/300x400/1E3A8A/FFFFFF?text=Sem+Capa';
+        const statusClass = book.status === 'disponivel' ? 'disponivel' : 'emprestado';
+        const statusText = book.status === 'disponivel' ? 'Disponível' : 'Emprestado';
+        const defaultCover = 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop&crop=center';
         
         return `
             <article class="book-card animate-fade-in">
@@ -662,12 +662,12 @@ const UI = {
                         </button>
                         <button 
                             type="button" 
-                            class="btn ${book.status === 'disponível' ? 'btn-primary' : 'btn-secondary'}" 
+                            class="btn ${book.status === 'disponivel' ? 'btn-primary' : 'btn-secondary'}" 
                             onclick="BookManager.toggleBookStatus(${book.id})"
-                            aria-label="${book.status === 'disponível' ? 'Emprestar' : 'Devolver'} livro"
+                            aria-label="${book.status === 'disponivel' ? 'Emprestar' : 'Devolver'} livro"
                         >
-                            <i class="fas ${book.status === 'disponível' ? 'fa-hand-holding' : 'fa-undo'}" aria-hidden="true"></i>
-                            ${book.status === 'disponível' ? 'Emprestar' : 'Devolver'}
+                            <i class="fas ${book.status === 'disponivel' ? 'fa-hand-holding' : 'fa-undo'}" aria-hidden="true"></i>
+                            ${book.status === 'disponivel' ? 'Emprestar' : 'Devolver'}
                         </button>
                     </div>
                 </div>
@@ -1648,6 +1648,250 @@ class BibliotecaApp {
 }
 
 // ========================================
+// GERENCIADOR DO MENU LATERAL
+// ========================================
+
+const MenuManager = {
+    init() {
+        this.setupMenuToggle();
+        this.setupResponsiveMenu();
+    },
+
+    setupMenuToggle() {
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                
+                // Atualizar ícone
+                const icon = menuToggle.querySelector('i');
+                if (sidebar.classList.contains('open')) {
+                    icon.className = 'fas fa-times';
+                } else {
+                    icon.className = 'fas fa-bars';
+                }
+            });
+        }
+    },
+
+    setupResponsiveMenu() {
+        // Fechar menu ao clicar fora (mobile)
+        document.addEventListener('click', (e) => {
+            const sidebar = document.querySelector('.sidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+            
+            if (sidebar && menuToggle && window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('open')) {
+                    sidebar.classList.remove('open');
+                    menuToggle.querySelector('i').className = 'fas fa-bars';
+                }
+            }
+        });
+
+        // Fechar menu ao navegar (mobile)
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const sidebar = document.querySelector('.sidebar');
+                const menuToggle = document.getElementById('menu-toggle');
+                
+                if (sidebar && menuToggle && window.innerWidth <= 768) {
+                    sidebar.classList.remove('open');
+                    menuToggle.querySelector('i').className = 'fas fa-bars';
+                }
+            });
+        });
+    }
+};
+
+// ========================================
+// PERSONALIZADOR DE CORES
+// ========================================
+
+const ColorCustomizer = {
+    init() {
+        this.setupColorCustomizer();
+        this.loadSavedColors();
+    },
+
+    setupColorCustomizer() {
+        const customizeBtn = document.getElementById('customize-colors');
+        
+        if (customizeBtn) {
+            customizeBtn.addEventListener('click', () => {
+                this.openColorModal();
+            });
+        }
+
+        // Aplicar cores
+        const applyBtn = document.getElementById('apply-colors');
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                this.applyColors();
+            });
+        }
+
+        // Resetar cores
+        const resetBtn = document.getElementById('reset-all-colors');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetAllColors();
+            });
+        }
+
+        // Sincronizar inputs de cor
+        this.setupColorInputs();
+    },
+
+    setupColorInputs() {
+        const colorInputs = ['primary-color', 'primary-hover', 'accent-blue'];
+        
+        colorInputs.forEach(inputId => {
+            const colorInput = document.getElementById(inputId);
+            const textInput = document.getElementById(inputId + '-text');
+            
+            if (colorInput && textInput) {
+                // Atualizar texto quando cor muda
+                colorInput.addEventListener('input', (e) => {
+                    textInput.value = e.target.value.toUpperCase();
+                    this.updatePreview();
+                });
+
+                // Atualizar cor quando texto muda
+                textInput.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                        colorInput.value = value;
+                        this.updatePreview();
+                    }
+                });
+            }
+        });
+    },
+
+    openColorModal() {
+        const modal = document.getElementById('color-customizer-modal');
+        if (modal) {
+            modal.classList.add('active');
+            this.updatePreview();
+        }
+    },
+
+    updatePreview() {
+        const primaryColor = document.getElementById('primary-color')?.value || '#1E3A8A';
+        const primaryHover = document.getElementById('primary-hover')?.value || '#1E40AF';
+        const accentBlue = document.getElementById('accent-blue')?.value || '#3B82F6';
+
+        // Atualizar preview em tempo real
+        const previewBtn = document.querySelector('.preview-btn');
+        const previewLink = document.querySelector('.preview-link');
+        const previewCard = document.querySelector('.preview-card');
+
+        if (previewBtn) {
+            previewBtn.style.backgroundColor = primaryColor;
+            previewBtn.style.borderColor = primaryColor;
+        }
+
+        if (previewLink) {
+            previewLink.style.color = primaryColor;
+        }
+
+        if (previewCard) {
+            previewCard.style.borderLeftColor = primaryColor;
+            const cardTitle = previewCard.querySelector('h5');
+            if (cardTitle) {
+                cardTitle.style.color = primaryColor;
+            }
+        }
+    },
+
+    applyColors() {
+        const primaryColor = document.getElementById('primary-color')?.value || '#1E3A8A';
+        const primaryHover = document.getElementById('primary-hover')?.value || '#1E40AF';
+        const accentBlue = document.getElementById('accent-blue')?.value || '#3B82F6';
+
+        // Aplicar cores ao CSS
+        document.documentElement.style.setProperty('--primary-color', primaryColor);
+        document.documentElement.style.setProperty('--primary-hover', primaryHover);
+        document.documentElement.style.setProperty('--accent-blue', accentBlue);
+
+        // Salvar cores
+        this.saveColors({
+            primaryColor,
+            primaryHover,
+            accentBlue
+        });
+
+        // Fechar modal
+        UI.closeModal('color-customizer-modal');
+
+        UI.showToast('🎨 Cores personalizadas aplicadas com sucesso!', 'success');
+    },
+
+    resetAllColors() {
+        const defaultColors = {
+            'primary-color': '#1E3A8A',
+            'primary-hover': '#1E40AF', 
+            'accent-blue': '#3B82F6'
+        };
+
+        Object.entries(defaultColors).forEach(([id, color]) => {
+            const colorInput = document.getElementById(id);
+            const textInput = document.getElementById(id + '-text');
+            
+            if (colorInput) colorInput.value = color;
+            if (textInput) textInput.value = color;
+        });
+
+        this.updatePreview();
+    },
+
+    saveColors(colors) {
+        localStorage.setItem('biblioteca-custom-colors', JSON.stringify(colors));
+    },
+
+    loadSavedColors() {
+        try {
+            const saved = localStorage.getItem('biblioteca-custom-colors');
+            if (saved) {
+                const colors = JSON.parse(saved);
+                
+                // Aplicar cores salvas
+                document.documentElement.style.setProperty('--primary-color', colors.primaryColor);
+                document.documentElement.style.setProperty('--primary-hover', colors.primaryHover);
+                document.documentElement.style.setProperty('--accent-blue', colors.accentBlue);
+
+                // Atualizar inputs se modal existir
+                setTimeout(() => {
+                    if (document.getElementById('primary-color')) {
+                        document.getElementById('primary-color').value = colors.primaryColor;
+                        document.getElementById('primary-color-text').value = colors.primaryColor;
+                        document.getElementById('primary-hover').value = colors.primaryHover;
+                        document.getElementById('primary-hover-text').value = colors.primaryHover;
+                        document.getElementById('accent-blue').value = colors.accentBlue;
+                        document.getElementById('accent-blue-text').value = colors.accentBlue;
+                    }
+                }, 100);
+            }
+        } catch (error) {
+            console.warn('Erro ao carregar cores personalizadas:', error);
+        }
+    }
+};
+
+// Função global para resetar cor individual
+window.resetColor = function(inputId, defaultColor) {
+    const colorInput = document.getElementById(inputId);
+    const textInput = document.getElementById(inputId + '-text');
+    
+    if (colorInput) colorInput.value = defaultColor;
+    if (textInput) textInput.value = defaultColor;
+    
+    ColorCustomizer.updatePreview();
+};
+
+// ========================================
 // INICIALIZAÇÃO
 // ========================================
 
@@ -1655,6 +1899,10 @@ class BibliotecaApp {
 document.addEventListener('DOMContentLoaded', async () => {
     const app = new BibliotecaApp();
     await app.init();
+    
+    // Inicializar novos gerenciadores
+    MenuManager.init();
+    ColorCustomizer.init();
 });
 
 // Expor funções globais necessárias

@@ -1,5 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html        <header class="header">
+            <!-- Botão Menu -->
+            <button id="menu-toggle" class="menu-toggle" aria-label="Abrir/Fechar Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <!-- Logo e Título -->
+            <div class="header-brand">
+                <i class="fas fa-book-open" aria-hidden="true"></i>
+                <div class="brand-text">
+                    <h1>Biblioteca Escolar</h1>
+                    <span class="header-subtitle">HQs & Graphic Novels</span>
+                    <span id="offline-indicator" class="offline-indicator" style="display: none;">
+                        <i class="fas fa-wifi-slash" aria-hidden="true"></i>
+                        Modo Offline
+                    </span>
+                </div>
+            </div>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -85,6 +102,16 @@
                 >
                     <i class="fas fa-plus" aria-hidden="true"></i>
                     <span>Novo Livro</span>
+                </button>
+                
+                <button 
+                    type="button" 
+                    class="btn btn-secondary" 
+                    id="customize-colors"
+                    aria-label="Personalizar cores do site"
+                    title="Personalizar Cores"
+                >
+                    <i class="fas fa-palette" aria-hidden="true"></i>
                 </button>
                 
                 <button 
@@ -330,6 +357,67 @@
             </div>
         </section>
     </main>
+
+    <!-- Modal Personalização de Cores -->
+    <div id="color-customizer-modal" class="modal" aria-labelledby="color-modal-title" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="color-modal-title">🎨 Personalizar Cores</h3>
+                <button type="button" class="modal-close" data-modal="color-customizer-modal" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="color-customizer">
+                    <p>Personalize as cores azuis do site para sua preferência:</p>
+                    
+                    <div class="color-option">
+                        <label for="primary-color">🔵 Cor Primária (Botões e Links):</label>
+                        <div class="color-input-group">
+                            <input type="color" id="primary-color" value="#1E3A8A">
+                            <input type="text" id="primary-color-text" value="#1E3A8A" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="resetColor('primary-color', '#1E3A8A')">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-option">
+                        <label for="primary-hover">🔷 Cor Hover (Efeito ao passar o mouse):</label>
+                        <div class="color-input-group">
+                            <input type="color" id="primary-hover" value="#1E40AF">
+                            <input type="text" id="primary-hover-text" value="#1E40AF" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="resetColor('primary-hover', '#1E40AF')">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-option">
+                        <label for="accent-blue">💙 Azul Accent (Destaques):</label>
+                        <div class="color-input-group">
+                            <input type="color" id="accent-blue" value="#3B82F6">
+                            <input type="text" id="accent-blue-text" value="#3B82F6" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="resetColor('accent-blue', '#3B82F6')">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-preview">
+                        <h4>👀 Visualização:</h4>
+                        <div class="preview-items">
+                            <button class="btn btn-primary preview-btn">Botão Primário</button>
+                            <a href="#" class="preview-link">Link de Exemplo</a>
+                            <div class="preview-card">
+                                <h5>Card de Exemplo</h5>
+                                <p>Este é um exemplo de como ficará.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="reset-all-colors">🔄 Resetar Tudo</button>
+                <button type="button" class="btn btn-secondary modal-close" data-modal="color-customizer-modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="apply-colors">✅ Aplicar Cores</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal para Novo/Editar Livro -->
     <div id="livro-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
