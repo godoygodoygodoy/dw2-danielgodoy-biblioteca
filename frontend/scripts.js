@@ -534,17 +534,45 @@ const UI = {
         try {
             const filters = { ...AppState.filters };
             
-            // Mapear filtros para API
-            const apiFilters = {};
-            if (filters.search) apiFilters.search = filters.search;
-            if (filters.status) apiFilters.status = filters.status;
-            if (filters.editora) apiFilters.editora = filters.editora;
-            if (filters.genero) apiFilters.genero = filters.genero;
-
-            const books = await ApiService.getBooks(apiFilters);
+            // Obter todos os livros primeiro
+            const allBooks = await ApiService.getBooks();
             
-            AppState.currentBooks = books;
-            AppState.filteredBooks = this.sortBooks([...books], filters.sort);
+            // Aplicar filtros localmente
+            let filteredBooks = [...allBooks];
+            
+            // Filtro de busca
+            if (filters.search) {
+                const searchTerm = filters.search.toLowerCase();
+                filteredBooks = filteredBooks.filter(book => 
+                    book.titulo.toLowerCase().includes(searchTerm) ||
+                    book.autor.toLowerCase().includes(searchTerm) ||
+                    book.editora.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Filtro de status
+            if (filters.status) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.status === filters.status
+                );
+            }
+            
+            // Filtro de editora
+            if (filters.editora) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.editora === filters.editora
+                );
+            }
+            
+            // Filtro de gênero (se implementado)
+            if (filters.genero) {
+                filteredBooks = filteredBooks.filter(book => 
+                    book.genero === filters.genero
+                );
+            }
+            
+            AppState.currentBooks = allBooks;
+            AppState.filteredBooks = this.sortBooks(filteredBooks, filters.sort);
             
             this.renderBooks();
             this.updateResultCount();
@@ -658,6 +686,25 @@ const UI = {
             showingElement.textContent = showing;
             totalElement.textContent = total;
         }
+        
+        // Atualizar contadores de filtros
+        this.updateFilterCounts();
+    },
+    
+    updateFilterCounts() {
+        const allBooks = AppState.currentBooks;
+        
+        // Contadores de status
+        const disponiveisCount = allBooks.filter(book => book.status === 'disponivel').length;
+        const emprestadosCount = allBooks.filter(book => book.status === 'emprestado').length;
+        
+        const countDisponiveisEl = document.getElementById('count-disponiveis');
+        const countEmprestadosEl = document.getElementById('count-emprestados');
+        const countTodosEl = document.getElementById('count-todos');
+        
+        if (countDisponiveisEl) countDisponiveisEl.textContent = disponiveisCount;
+        if (countEmprestadosEl) countEmprestadosEl.textContent = emprestadosCount;
+        if (countTodosEl) countTodosEl.textContent = allBooks.length;
     },
 
     renderPagination() {
