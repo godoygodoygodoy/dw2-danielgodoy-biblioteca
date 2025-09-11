@@ -159,84 +159,84 @@ const ApiService = {
         const mockBooks = [
             {
                 id: 1,
-                titulo: "Homem-Aranha: A Grande Responsabilidade",
-                autor: "Stan Lee, Steve Ditko",
-                ano: 2023,
+                titulo: "The Amazing Spider-Man #1",
+                autor: "Stan Lee",
+                ano: 1963,
                 genero: "Super-Herói",
-                editora: "Marvel",
+                editora: "Marvel Comics",
                 numero_edicao: 1,
                 isbn: "978-0-12345-001-1",
-                status: "disponível",
+                status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A origem clássica do Homem-Aranha reimaginada para uma nova geração.",
                 capa_url: "https://via.placeholder.com/300x400/FF0000/FFFFFF?text=Spider-Man"
             },
             {
                 id: 2,
-                titulo: "X-Men: Fênix Negra - Saga Completa",
-                autor: "Chris Claremont, John Byrne",
-                ano: 2022,
+                titulo: "X-Men #1",
+                autor: "Stan Lee",
+                ano: 1963,
                 genero: "Super-Herói",
-                editora: "Marvel",
-                numero_edicao: 2,
+                editora: "Marvel Comics",
+                numero_edicao: 1,
                 isbn: "978-0-12345-002-2",
                 status: "emprestado",
-                data_emprestimo: "2025-09-05T00:00:00",
+                data_emprestimo: "2023-12-01",
                 descricao: "A saga épica da Fênix Negra que mudou os X-Men para sempre.",
                 capa_url: "https://via.placeholder.com/300x400/FFA500/FFFFFF?text=X-Men"
             },
             {
                 id: 3,
-                titulo: "Batman: Ano Um",
-                autor: "Frank Miller, David Mazzucchelli",
-                ano: 2023,
+                titulo: "Batman: Year One",
+                autor: "Frank Miller",
+                ano: 1987,
                 genero: "Crime",
-                editora: "DC",
+                editora: "DC Comics",
                 numero_edicao: 1,
                 isbn: "978-0-12345-007-7",
-                status: "disponível",
+                status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A origem definitiva do Batman e sua primeira parceria com Jim Gordon.",
                 capa_url: "https://via.placeholder.com/300x400/000000/FFFF00?text=Batman"
             },
             {
                 id: 4,
-                titulo: "The Walking Dead: Compendium Vol. 1",
-                autor: "Robert Kirkman, Tony Moore",
-                ano: 2023,
+                titulo: "The Walking Dead #1",
+                autor: "Robert Kirkman",
+                ano: 2003,
                 genero: "Horror",
-                editora: "Image",
+                editora: "Image Comics",
                 numero_edicao: 1,
                 isbn: "978-0-12345-013-3",
-                status: "disponível",
+                status: "disponivel",
                 data_emprestimo: null,
                 descricao: "A saga épica de sobrivência no apocalipse zumbi.",
                 capa_url: "https://via.placeholder.com/300x400/2F4F2F/FFFFFF?text=WalkingDead"
             },
             {
                 id: 5,
-                titulo: "Superman: Todas as Estrelas",
-                autor: "Grant Morrison, Frank Quitely",
-                ano: 2022,
+                titulo: "Superman #1",
+                autor: "Jerry Siegel",
+                ano: 1939,
                 genero: "Super-Herói",
-                editora: "DC",
-                numero_edicao: 3,
+                editora: "DC Comics",
+                numero_edicao: 1,
                 isbn: "978-0-12345-008-8",
                 status: "emprestado",
-                data_emprestimo: "2025-09-08T00:00:00",
+                data_emprestimo: "2023-11-15",
                 descricao: "Uma reinvenção moderna do Homem de Aço.",
                 capa_url: "https://via.placeholder.com/300x400/0066CC/FF0000?text=Superman"
             },
             {
                 id: 6,
-                titulo: "Saga Vol. 1",
-                autor: "Brian K. Vaughan, Fiona Staples",
-                ano: 2023,
+                titulo: "Saga #1",
+                autor: "Brian K. Vaughan",
+                ano: 2012,
                 genero: "Ficção Científica",
-                editora: "Image",
+                editora: "Image Comics",
                 numero_edicao: 1,
                 isbn: "978-0-12345-015-5",
-                status: "disponível",
+                status: "disponivel",
                 data_emprestimo: null,
                 descricao: "Uma épica space opera sobre amor e família.",
                 capa_url: "https://via.placeholder.com/300x400/9932CC/FFFFFF?text=Saga"
@@ -245,7 +245,7 @@ const ApiService = {
 
         const mockStats = {
             total_livros: mockBooks.length,
-            livros_disponiveis: mockBooks.filter(b => b.status === 'disponível').length,
+            livros_disponiveis: mockBooks.filter(b => b.status === 'disponivel').length,
             livros_emprestados: mockBooks.filter(b => b.status === 'emprestado').length,
             por_editora: {
                 'Marvel': mockBooks.filter(b => b.editora === 'Marvel').length,
@@ -1179,9 +1179,8 @@ const FilterManager = {
     applyFilters() {
         AppState.currentPagination = 1; // Reset para primeira página
         
-        if (AppState.currentPage === 'catalogo') {
-            UI.searchAndFilter();
-        }
+        // Sempre aplicar filtros, independente da página atual
+        UI.searchAndFilter();
         
         this.saveFilters();
     },
