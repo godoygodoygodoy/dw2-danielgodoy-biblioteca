@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Biblioteca Escolar - Gerenciamento de HQs Marvel, DC e Image Comics">
+    <title>Biblioteca Escolar - Sistema de Gerenciamento</title>
+    
+    <!-- Fonte Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS personalizado -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header Principal -->
+    <header class="main-header" role="banner">
+        <div class="header-container">
+            <!-- Botão Menu Mobile -->
+            <button id="menu-toggle" class="menu-toggle" aria-label="Abrir/Fechar Menu" type="button">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+
+            <!-- Logo e Título -->
+            <div class="header-brand">
+                <i class="fas fa-book-open" aria-hidden="true"></i>
+                <div class="brand-text">
+                    <h1>Biblioteca Escolar</h1>
+                    <span class="header-subtitle">HQs & Graphic Novels</span>
+                    <span id="offline-indicator" class="offline-indicator" style="display: none;">
+                        <i class="fas fa-wifi-slash" aria-hidden="true"></i>
+                        Modo Offline
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Navegação Principal -->
+            <nav class="main-nav" role="navigation" aria-label="Navegação principal">
+                <ul class="nav-list">
+                    <li><a href="#home" class="nav-link active" data-page="home">
+                        <i class="fas fa-home" aria-hidden="true"></i>
+                        <span>Início</span>
+                    </a></li>
+                    <li><a href="#catalogo" class="nav-link" data-page="catalogo">
+                        <i class="fas fa-book" aria-hidden="true"></i>
+                        <span>Catálogo</span>
+                    </a></li>
+                    <li><a href="#gerenciar" class="nav-link" data-page="gerenciar">
+                        <i class="fas fa-cog" aria-hidden="true"></i>
+                        <span>Gerenciar</span>
+                    </a></li>
+                    <li><a href="#relatorios" class="nav-link" data-page="relatorios">
+                        <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                        <span>Relatórios</span>
+                    </a></li>
+                </ul>
+            </nav>
+            
+            <!-- Área de Busca -->
+            <div class="header-search">
+                <div class="search-container">
+                    <input 
+                        type="search" 
+                        id="search-input" 
+                        class="search-input"
+                        placeholder="Buscar por título ou autor..."
+                        aria-label="Buscar livros por título ou autor"
+                        autocomplete="off"
+                    >
+                    <button type="button" class="search-btn" aria-label="Buscar">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Botões de Ação -->
+            <div class="header-actions">
+                <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    id="novo-livro-btn"
+                    aria-label="Adicionar novo livro"
+                    accesskey="n"
+                    title="Adicionar Novo Livro (Alt+N)"
+                >
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    <span>Novo Livro</span>
+                </button>
+                
+                <button 
+                    type="button" 
+                    class="btn btn-secondary" 
+                    id="customize-colors"
+                    aria-label="Personalizar cores do site"
+                    title="Personalizar Cores"
+                >
+                    <i class="fas fa-palette" aria-hidden="true"></i>
+                </button>
+                
+                <button 
+                    type="button" 
+                    class="btn btn-secondary theme-toggle" 
+                    id="theme-toggle"
+                    aria-label="Alternar tema claro/escuro"
+                    title="Alternar Tema"
+                >
+                    <i class="fas fa-moon" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container Principal -->
+    <main class="main-container" role="main">
+        <!-- Sidebar de Filtros -->
+        <aside class="sidebar" role="complementary" aria-label="Filtros de busca">
+            <div class="sidebar-header">
+                <h2>Filtros</h2>
+                <button type="button" class="btn-link" id="clear-filters" aria-label="Limpar todos os filtros">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                    Limpar
+                </button>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Status</h3>
+                <div class="filter-group">
+                    <label class="filter-item">
+                        <input type="radio" name="status-filter" value="" checked>
+                        <span class="filter-label">Todos</span>
+                        <span class="filter-count" id="count-todos">0</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="status-filter" value="disponivel">
+                        <span class="filter-label">Disponíveis</span>
+                        <span class="filter-count" id="count-disponiveis">0</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="status-filter" value="emprestado">
+                        <span class="filter-label">Emprestados</span>
+                        <span class="filter-count" id="count-emprestados">0</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Editora</h3>
+                <div class="filter-group">
+                    <label class="filter-item">
+                        <input type="radio" name="editora-filter" value="" checked>
+                        <span class="filter-label">Todas</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="editora-filter" value="Marvel Comics">
+                        <span class="filter-label">Marvel</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="editora-filter" value="DC Comics">
+                        <span class="filter-label">DC Comics</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="editora-filter" value="Image Comics">
+                        <span class="filter-label">Image Comics</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="editora-filter" value="Dark Horse">
+                        <span class="filter-label">Dark Horse</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Gênero</h3>
+                <div class="filter-group">
+                    <label class="filter-item">
+                        <input type="radio" name="genero-filter" value="" checked>
+                        <span class="filter-label">Todos</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="genero-filter" value="Super-Herói">
+                        <span class="filter-label">Super-Herói</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="genero-filter" value="Horror">
+                        <span class="filter-label">Horror</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="genero-filter" value="Ficção Científica">
+                        <span class="filter-label">Ficção Científica</span>
+                    </label>
+                    <label class="filter-item">
+                        <input type="radio" name="genero-filter" value="Crime">
+                        <span class="filter-label">Crime</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <h3>Ordenação</h3>
+                <select id="sort-select" class="form-select" aria-label="Ordenar livros">
+                    <option value="titulo-asc">Título (A-Z)</option>
+                    <option value="titulo-desc">Título (Z-A)</option>
+                    <option value="ano-asc">Ano (Antigos)</option>
+                    <option value="ano-desc">Ano (Recentes)</option>
+                    <option value="autor-asc">Autor (A-Z)</option>
+                    <option value="autor-desc">Autor (Z-A)</option>
+                </select>
+            </div>
+        </aside>
+
+        <!-- Área de Conteúdo -->
+        <section class="content-area">
+            <!-- Página Inicial -->
+            <div id="home-page" class="page active">
+                <div class="page-header">
+                    <h2>Dashboard da Biblioteca</h2>
+                    <p>Visão geral do acervo de HQs e Graphic Novels</p>
+                </div>
+                
+                <!-- Estatísticas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-book" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-livros">0</h3>
+                            <p>Total de Livros</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon stat-available">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-disponiveis">0</h3>
+                            <p>Disponíveis</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon stat-borrowed">
+                            <i class="fas fa-hand-holding" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-emprestados">0</h3>
+                            <p>Emprestados</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon stat-editoras">
+                            <i class="fas fa-building" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-editoras">0</h3>
+                            <p>Editoras</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Livros Recentes -->
+                <div class="recent-section">
+                    <h3>Adicionados Recentemente</h3>
+                    <div id="recent-books" class="book-grid">
+                        <!-- Livros recentes serão carregados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Página do Catálogo -->
+            <div id="catalogo-page" class="page">
+                <div class="page-header">
+                    <h2>Catálogo de HQs</h2>
+                    <div class="page-actions">
+                        <span class="result-count">
+                            Exibindo <span id="showing-count">0</span> de <span id="total-count">0</span> livros
+                        </span>
+                        <div class="view-controls">
+                            <button type="button" class="view-btn active" data-view="grid" aria-label="Visualização em grade">
+                                <i class="fas fa-th" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="view-btn" data-view="list" aria-label="Visualização em lista">
+                                <i class="fas fa-list" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Grid de Livros -->
+                <div id="books-grid" class="book-grid">
+                    <!-- Livros serão carregados aqui dinamicamente -->
+                </div>
+                
+                <!-- Paginação -->
+                <div class="pagination-container">
+                    <div class="pagination" id="pagination">
+                        <!-- Controles de paginação serão gerados aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Página de Gerenciamento -->
+            <div id="gerenciar-page" class="page">
+                <div class="page-header">
+                    <h2>Gerenciar Acervo</h2>
+                    <p>Adicionar, editar e remover livros do acervo</p>
+                </div>
+                
+                <div class="management-content">
+                    <!-- Formulário será mostrado aqui quando necessário -->
+                </div>
+            </div>
+
+            <!-- Página de Relatórios -->
+            <div id="relatorios-page" class="page">
+                <div class="page-header">
+                    <h2>Relatórios</h2>
+                    <p>Exportar dados e visualizar estatísticas detalhadas</p>
+                </div>
+                
+                <div class="export-actions">
+                    <button type="button" class="btn btn-outline" id="export-csv">
+                        <i class="fas fa-file-csv" aria-hidden="true"></i>
+                        Exportar CSV
+                    </button>
+                    <button type="button" class="btn btn-outline" id="export-json">
+                        <i class="fas fa-file-code" aria-hidden="true"></i>
+                        Exportar JSON
+                    </button>
+                </div>
+                
+                <div class="report-stats">
+                    <h3>Estatísticas Detalhadas</h3>
+                    <div id="detailed-stats">
+                        <!-- Estatísticas detalhadas serão carregadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Personalização de Cores -->
+    <div id="color-customizer-modal" class="modal" aria-labelledby="color-modal-title" role="dialog" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="color-modal-title">🎨 Personalizar Cores</h3>
+                <button type="button" class="modal-close" data-modal="color-customizer-modal" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="color-customizer">
+                    <p>Personalize as cores azuis do site para sua preferência:</p>
+                    
+                    <div class="color-option">
+                        <label for="primary-color">🔵 Cor Primária (Botões e Links):</label>
+                        <div class="color-input-group">
+                            <input type="color" id="primary-color" value="#1E3A8A">
+                            <input type="text" id="primary-color-text" value="#1E3A8A" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="resetColor('primary-color', '#1E3A8A')">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-option">
+                        <label for="primary-hover">🔷 Cor Hover (Efeito ao passar o mouse):</label>
+                        <div class="color-input-group">
+                            <input type="color" id="primary-hover" value="#1E40AF">
+                            <input type="text" id="primary-hover-text" value="#1E40AF" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="resetColor('primary-hover', '#1E40AF')">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-option">
+                        <label for="accent-blue">💙 Azul Accent (Destaques):</label>
+                        <div class="color-input-group">
+                            <input type="color" id="accent-blue" value="#3B82F6">
+                            <input type="text" id="accent-blue-text" value="#3B82F6" maxlength="7" pattern="^#[0-9A-Fa-f]{6}$">
+                            <button type="button" class="btn btn-sm btn-secondary" onclick="resetColor('accent-blue', '#3B82F6')">Reset</button>
+                        </div>
+                    </div>
+                    
+                    <div class="color-preview">
+                        <h4>👀 Visualização:</h4>
+                        <div class="preview-items">
+                            <button class="btn btn-primary preview-btn">Botão Primário</button>
+                            <a href="#" class="preview-link">Link de Exemplo</a>
+                            <div class="preview-card">
+                                <h5>Card de Exemplo</h5>
+                                <p>Este é um exemplo de como ficará.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="reset-all-colors">🔄 Resetar Tudo</button>
+                <button type="button" class="btn btn-secondary modal-close" data-modal="color-customizer-modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="apply-colors">✅ Aplicar Cores</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Novo/Editar Livro -->
+    <div id="livro-modal" class="modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Novo Livro</h3>
+                <button type="button" class="modal-close" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <form id="livro-form" class="modal-body" novalidate>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="titulo" class="form-label">
+                            Título <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="titulo" 
+                            name="titulo" 
+                            class="form-input"
+                            required
+                            minlength="3"
+                            maxlength="90"
+                            aria-describedby="titulo-error"
+                        >
+                        <div id="titulo-error" class="error-message" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="autor" class="form-label">
+                            Autor <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="autor" 
+                            name="autor" 
+                            class="form-input"
+                            required
+                            maxlength="100"
+                            aria-describedby="autor-error"
+                        >
+                        <div id="autor-error" class="error-message" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ano" class="form-label">
+                            Ano <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="number" 
+                            id="ano" 
+                            name="ano" 
+                            class="form-input"
+                            required
+                            min="1900"
+                            max="2025"
+                            aria-describedby="ano-error"
+                        >
+                        <div id="ano-error" class="error-message" role="alert"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editora" class="form-label">Editora</label>
+                        <select id="editora" name="editora" class="form-select">
+                            <option value="">Selecione uma editora</option>
+                            <option value="Marvel">Marvel Comics</option>
+                            <option value="DC">DC Comics</option>
+                            <option value="Image">Image Comics</option>
+                            <option value="Dark Horse">Dark Horse Comics</option>
+                            <option value="IDW">IDW Publishing</option>
+                            <option value="Vertigo">DC/Vertigo</option>
+                            <option value="Oni Press">Oni Press</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="genero" class="form-label">Gênero</label>
+                        <select id="genero" name="genero" class="form-select">
+                            <option value="">Selecione um gênero</option>
+                            <option value="Super-Herói">Super-Herói</option>
+                            <option value="Horror">Horror</option>
+                            <option value="Ficção Científica">Ficção Científica</option>
+                            <option value="Crime">Crime/Noir</option>
+                            <option value="Aventura">Aventura</option>
+                            <option value="Comédia">Comédia</option>
+                            <option value="Drama">Drama</option>
+                            <option value="Mitologia">Mitologia</option>
+                            <option value="Fantasia">Fantasia</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="numero_edicao" class="form-label">Número da Edição</label>
+                        <input 
+                            type="number" 
+                            id="numero_edicao" 
+                            name="numero_edicao" 
+                            class="form-input"
+                            min="1"
+                            placeholder="Ex: 1, 2, 3..."
+                        >
+                    </div>
+                    
+                    <div class="form-group form-group-full">
+                        <label for="isbn" class="form-label">ISBN</label>
+                        <input 
+                            type="text" 
+                            id="isbn" 
+                            name="isbn" 
+                            class="form-input"
+                            maxlength="20"
+                            placeholder="Ex: 978-0-12345-001-1"
+                        >
+                    </div>
+                    
+                    <div class="form-group form-group-full">
+                        <label for="capa_url" class="form-label">URL da Capa</label>
+                        <input 
+                            type="url" 
+                            id="capa_url" 
+                            name="capa_url" 
+                            class="form-input"
+                            placeholder="https://exemplo.com/capa.jpg"
+                        >
+                    </div>
+                    
+                    <div class="form-group form-group-full">
+                        <label for="descricao" class="form-label">Descrição</label>
+                        <textarea 
+                            id="descricao" 
+                            name="descricao" 
+                            class="form-textarea"
+                            rows="4"
+                            placeholder="Breve descrição da história..."
+                        ></textarea>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancel-btn">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="save-btn">
+                        Salvar Livro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="confirm-title" aria-hidden="true">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3 id="confirm-title">Confirmar Ação</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message">Tem certeza que deseja realizar esta ação?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="confirm-cancel">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirm-ok">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            <p>Carregando...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true">
+        <!-- Toasts serão adicionados dinamicamente aqui -->
+    </div>
+
+    <!-- JavaScript -->
+    <script src="scripts.js"></script>
+</body>
+</html>
