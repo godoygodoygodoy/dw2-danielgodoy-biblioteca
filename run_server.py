@@ -1,43 +1,25 @@
 import os
 import sys
 
-# Add current directory to path
-sys.path.insert(0, os.path.dirname(__file__))
+# Add backend directory to path
+backend_dir = os.path.join(os.path.dirname(__file__), "backend")
+sys.path.insert(0, backend_dir)
 
 from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
-from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Database setup
-BASE_DIR = os.path.dirname(__file__)
-DB_FILE = os.path.join(BASE_DIR, "backend", "app.db")
-SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_FILE}"
+# Import from backend
+from models import Livro
+from database import SessionLocal, init_database
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-# Models
-class Livro(Base):
-    __tablename__ = "livros"
-
-    id = Column(Integer, primary_key=True, index=True)
-    titulo = Column(String(120), nullable=False, unique=True)
-    autor = Column(String(80), nullable=False)
-    ano = Column(Integer, nullable=False)
-    genero = Column(String(50), nullable=True)
-    isbn = Column(String(20), nullable=True)
-    cover_url = Column(String(400), nullable=True)
-    status = Column(String(20), nullable=False, default="disponível")
-    data_emprestimo = Column(DateTime, nullable=True)
-
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Initialize database
+init_database()
 
 app = FastAPI(title="Biblioteca Escolar - API")
 app.add_middleware(
@@ -47,6 +29,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="frontend"), name="static")
+
+# Root route to serve index.html
+@app.get("/")
+async def root():
+    return FileResponse("frontend/index.html")
+
+# Serve CSS and JS files
+@app.get("/styles.css")
+async def get_styles():
+    return FileResponse("frontend/styles.css")
+
+@app.get("/scripts.js")
+async def get_scripts():
+    return FileResponse("frontend/scripts.js")
 
 # Dependency
 def get_db():
@@ -59,11 +58,14 @@ def get_db():
 # Pydantic models
 class LivroCreate(BaseModel):
     titulo: str = Field(..., min_length=3, max_length=90)
-    autor: str = Field(..., min_length=3, max_length=80)
+    autor: str = Field(..., min_length=3, max_length=100)
     ano: int = Field(..., ge=1900, le=datetime.utcnow().year)
     genero: Optional[str] = None
     isbn: Optional[str] = None
-    cover_url: Optional[str] = None
+    editora: Optional[str] = None
+    numero_edicao: Optional[int] = None
+    descricao: Optional[str] = None
+    capa_url: Optional[str] = None
     status: Optional[str] = "disponível"
 
     @validator('status')
@@ -74,31 +76,58 @@ class LivroCreate(BaseModel):
 
 class LivroUpdate(BaseModel):
     titulo: Optional[str] = Field(None, min_length=3, max_length=90)
-    autor: Optional[str] = Field(None, min_length=3, max_length=80)
+    autor: Optional[str] = Field(None, min_length=3, max_length=100)
     ano: Optional[int] = Field(None, ge=1900, le=datetime.utcnow().year)
-    genero: Optional[str]
-    isbn: Optional[str]
-    cover_url: Optional[str]
-    status: Optional[str]
+    genero: Optional[str] = None
+    isbn: Optional[str] = None
+    editora: Optional[str] = None
+    numero_edicao: Optional[int] = None
+    descricao: Optional[str] = None
+    capa_url: Optional[str] = None
+    status: Optional[str] = None
 
 class LivroOut(BaseModel):
     id: int
     titulo: str
     autor: str
     ano: int
-    genero: Optional[str]
-    isbn: Optional[str]
-    cover_url: Optional[str]
-    status: str
-    data_emprestimo: Optional[datetime]
+    genero: Optional[str] = None
+    isbn: Optional[str] = None
+    editora: Optional[str] = None
+    numero_edicao: Optional[int] = None
+    descricao: Optional[str] = None
+    capa_url: Optional[str] = None
+    status: str = "disponível"
+    data_emprestimo: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
+
+@app.get("/api/estatisticas")
+def get_estatisticas(db: Session = Depends(get_db)):
+    total_livros = db.query(Livro).count()
+    livros_disponiveis = db.query(Livro).filter(Livro.status == "disponível").count()
+    livros_emprestados = db.query(Livro).filter(Livro.status == "emprestado").count()
+    
+    # Estatísticas por editora
+    editoras = db.query(Livro.editora).distinct().all()
+    por_editora = {}
+    for (editora,) in editoras:
+        if editora:
+            count = db.query(Livro).filter(Livro.editora == editora).count()
+            por_editora[editora] = count
+    
+    return {
+        "total_livros": total_livros,
+        "livros_disponiveis": livros_disponiveis,
+        "livros_emprestados": livros_emprestados,
+        "por_editora": por_editora
+    }
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
-@app.get("/livros")
+@app.get("/api/livros")
 def list_livros(search: Optional[str] = None, genero: Optional[str] = None, ano: Optional[int] = None, status: Optional[str] = None, page: int = 1, per_page: int = 10, db: Session = Depends(get_db)) -> Dict[str, Any]:
     # pagination safety
     if page < 1:
@@ -123,7 +152,7 @@ def list_livros(search: Optional[str] = None, genero: Optional[str] = None, ano:
     items = q.order_by(Livro.titulo).offset((page - 1) * per_page).limit(per_page).all()
     return {"items": items, "total": total, "page": page, "per_page": per_page}
 
-@app.post("/livros", response_model=LivroOut, status_code=201)
+@app.post("/api/livros", response_model=LivroOut, status_code=201)
 def create_livro(payload: LivroCreate, db: Session = Depends(get_db)):
     # check duplicate titulo
     existing = db.query(Livro).filter(Livro.titulo == payload.titulo).first()
@@ -143,7 +172,7 @@ def create_livro(payload: LivroCreate, db: Session = Depends(get_db)):
     db.refresh(livro)
     return livro
 
-@app.put("/livros/{livro_id}", response_model=LivroOut)
+@app.put("/api/livros/{livro_id}", response_model=LivroOut)
 def update_livro(livro_id: int, payload: LivroUpdate, db: Session = Depends(get_db)):
     livro = db.query(Livro).get(livro_id)
     if not livro:
@@ -155,7 +184,7 @@ def update_livro(livro_id: int, payload: LivroUpdate, db: Session = Depends(get_
     db.refresh(livro)
     return livro
 
-@app.delete("/livros/{livro_id}", status_code=204)
+@app.delete("/api/livros/{livro_id}", status_code=204)
 def delete_livro(livro_id: int, db: Session = Depends(get_db)):
     livro = db.query(Livro).get(livro_id)
     if not livro:
@@ -164,7 +193,7 @@ def delete_livro(livro_id: int, db: Session = Depends(get_db)):
     db.commit()
     return None
 
-@app.post("/livros/{livro_id}/emprestar", response_model=LivroOut)
+@app.post("/api/livros/{livro_id}/emprestar", response_model=LivroOut)
 def emprestar_livro(livro_id: int, db: Session = Depends(get_db)):
     livro = db.query(Livro).get(livro_id)
     if not livro:
@@ -178,7 +207,7 @@ def emprestar_livro(livro_id: int, db: Session = Depends(get_db)):
     db.refresh(livro)
     return livro
 
-@app.post("/livros/{livro_id}/devolver", response_model=LivroOut)
+@app.post("/api/livros/{livro_id}/devolver", response_model=LivroOut)
 def devolver_livro(livro_id: int, db: Session = Depends(get_db)):
     livro = db.query(Livro).get(livro_id)
     if not livro:

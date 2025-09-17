@@ -226,20 +226,6 @@ const ApiService = {
                 data_emprestimo: "2023-11-15",
                 descricao: "Uma reinvenção moderna do Homem de Aço.",
                 capa_url: "https://i.imgur.com/kWJQz2R.jpg"
-            },
-            {
-                id: 6,
-                titulo: "Saga #1",
-                autor: "Brian K. Vaughan",
-                ano: 2012,
-                genero: "Ficção Científica",
-                editora: "Image Comics",
-                numero_edicao: 1,
-                isbn: "978-0-12345-015-5",
-                status: "disponivel",
-                data_emprestimo: null,
-                descricao: "Uma épica space opera sobre amor e família.",
-                capa_url: "https://i.imgur.com/8FmVQNk.jpg"
             }
         ];
 

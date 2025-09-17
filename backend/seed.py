@@ -199,18 +199,6 @@ def create_seed_data():
                 "data_emprestimo": datetime(2025, 9, 6)
             },
             {
-                "titulo": "Saga Vol. 1",
-                "autor": "Brian K. Vaughan, Fiona Staples",
-                "ano": 2023,
-                "genero": "Ficção Científica",
-                "editora": "Image",
-                "numero_edicao": 1,
-                "isbn": "978-0-12345-015-5",
-                "descricao": "Uma épica space opera sobre amor e família.",
-                "capa_url": "https://via.placeholder.com/300x400/9932CC/FFFFFF?text=Saga",
-                "status": "disponível"
-            },
-            {
                 "titulo": "Invincible: Compendium Vol. 1",
                 "autor": "Robert Kirkman, Cory Walker",
                 "ano": 2022,
