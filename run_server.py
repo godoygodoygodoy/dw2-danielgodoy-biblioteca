@@ -1,6 +1,17 @@
 import os
 import sys
 
+import os
+import sys
+from pathlib import Path
+
+# Carregar variáveis de ambiente do arquivo .env
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # python-dotenv não instalado, usar variáveis do sistema
+
 # Add backend directory to path
 backend_dir = os.path.join(os.path.dirname(__file__), "backend")
 sys.path.insert(0, backend_dir)
@@ -223,4 +234,11 @@ def devolver_livro(livro_id: int, db: Session = Depends(get_db)):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8002)
+    import os
+    
+    # Configuração para deploy (Render, Heroku, etc.)
+    port = int(os.environ.get("PORT", 8002))
+    host = os.environ.get("HOST", "0.0.0.0")
+    
+    print(f"🚀 Iniciando servidor em {host}:{port}")
+    uvicorn.run(app, host=host, port=port)
